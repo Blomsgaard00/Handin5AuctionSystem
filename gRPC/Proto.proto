@@ -1,0 +1,24 @@
+syntax = "proto3";
+package Auction;
+
+option go_package = "Handin5AuctionSystem/gRPC";
+
+//Heavily inspired by https://medium.com/@bhadange.atharv/building-a-real-time-chat-application-with-grpc-and-go-aa226937ad3c
+
+message Bid {
+    int32 amount = 1;
+}
+message Ack {
+    string bidAccepted = 1;
+}
+
+message Result {
+    string result = 1;
+}
+
+message Empty{}
+
+service Auction {
+    rpc Bidding(Bid) returns (Ack);
+    rpc GetResult(Empty) returns (Result);
+}
