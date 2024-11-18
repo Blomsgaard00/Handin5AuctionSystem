@@ -26,7 +26,6 @@ func main() {
 	client := proto.NewChittyChatClient(conn)
 	var wg sync.WaitGroup
 
-	
 	timestamp = 0
 	connectionMessage := &proto.Connect{
 		Active:    true,

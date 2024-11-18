@@ -47,14 +47,14 @@ func main() {
 	// Register the pool with the gRPC server
 	proto.RegisterAuctionServer(grpcServer, AuctionServer)
 
-	// Create a TCP listener at port 5100
-	listener, err := net.Listen("tcp", ":5100")
+	// Create a TCP listener at port 5103
+	listener, err := net.Listen("tcp", ":5103")
 
 	if err != nil {
 		log.Fatalf("Error creating the server %v", err)
 	}
 
-	log.Println("Server started at port :5100")
+	log.Println("Server started at port :5103")
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Error creating the server %v", err)
