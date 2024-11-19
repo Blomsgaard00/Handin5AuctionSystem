@@ -10,14 +10,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-type AuctionServer1 struct {
+type AuctionServer struct {
 	proto.UnimplementedAuctionServer
 	auctionOpen bool
 	highestBid proto.Bid
 }
 
 // bididng
-func (s *AuctionServer1) Bidding(ctx context.Context, currentBid *proto.Bid) (*proto.Ack, error) {
+func (s *AuctionServer) Bidding(ctx context.Context, currentBid *proto.Bid) (*proto.Ack, error) {
 	
 	if (s.highestBid.Amount < currentBid.Amount){
 		s.highestBid.Amount = currentBid.Amount
@@ -37,15 +37,15 @@ func (s *AuctionServer1) Bidding(ctx context.Context, currentBid *proto.Bid) (*p
 
 // ctx context.Context, msg *proto.Message) (*proto.Close, error
 // result
-func (s *AuctionServer1) GetResult(ctx context.Context, empty *proto.Empty) (*proto.Result, error) {
+func (s *AuctionServer) GetResult(ctx context.Context, empty *proto.Empty) (*proto.Result, error) {
 	if(s.auctionOpen){
 		result := &proto.Result{
-			Result: "Current highest bid is " + fmt.Sprint(s.highestBid.Amount) + " by client: " + fmt.Sprint(s.highestBid.Clientid),
+			Result: "Current highest bid is " + fmt.Sprint(s.highestBid.Amount) + " by client: " + s.highestBid.Clientid,
 		}
 		return result, nil//, s.currentWinner
 	}else{
 		result := &proto.Result{
-			Result: "The auction is over and the winner was client " + fmt.Sprint(s.highestBid.Clientid) + " with the bid " + fmt.Sprint(s.highestBid.Amount),
+			Result: "The auction is over and the winner was client " + s.highestBid.Clientid + " with the bid " + fmt.Sprint(s.highestBid.Amount),
 		}
 		return result, nil//, s.currentWinner
 	}
@@ -59,7 +59,7 @@ func main() {
 	//create instance
 
 	// Register the pool with the gRPC server
-	proto.RegisterAuctionServer(grpcServer, &AuctionServer1{})
+	proto.RegisterAuctionServer(grpcServer, &AuctionServer{})
 
 	// Create a TCP listener at port 5101
 	listener, err := net.Listen("tcp", ":5101")
