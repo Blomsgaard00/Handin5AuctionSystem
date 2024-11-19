@@ -7,6 +7,7 @@ option go_package = "Handin5AuctionSystem/gRPC";
 
 message Bid {
     int32 amount = 1;
+    int32 clientid = 2; 
 }
 message Ack {
     string bidAccepted = 1;
@@ -14,6 +15,7 @@ message Ack {
 
 message Result {
     string result = 1;
+    int32 clientid = 2; 
 }
 
 message Empty{}

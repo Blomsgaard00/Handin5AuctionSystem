@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-type AuctionServer struct {
-	proto.UnimplementedAuctionServer
+type AuctionServer2 struct {
+	proto.UnimplementedAuctionServer2
 	//stream?
 	//active bool
 	currentWinner string
@@ -22,7 +22,7 @@ type AuctionServer struct {
 }
 
 // bididng
-func (s *AuctionServer) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack) {
+func (s *AuctionServer2) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack) {
 	if (s.highestBid < msg.Bid){
 		s.highestBid = msg.Bid
 		return "bid valid"
@@ -33,7 +33,7 @@ func (s *AuctionServer) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack
 
 // ctx context.Context, msg *proto.Message) (*proto.Close, error
 // result
-func (s *AuctionServer) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result) {
+func (s *AuctionServer2) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result) {
 	return s.highestBid //, s.currentWinner
 }
 
@@ -45,7 +45,7 @@ func main() {
 	//create instance
 
 	// Register the pool with the gRPC server
-	proto.RegisterAuctionServer(grpcServer, AuctionServer)
+	proto.RegisterAuctionServer2(grpcServer, AuctionServer2)
 
 	// Create a TCP listener at port 5102
 	listener, err := net.Listen("tcp", ":5102")
