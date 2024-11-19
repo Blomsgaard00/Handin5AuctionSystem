@@ -3,10 +3,8 @@ package main
 import (
 	proto "Handin5AuctionSystem/gRPC"
 	"context"
-	//"fmt"
 	"log"
 	"net"
-	//"sync"
 
 	"google.golang.org/grpc"
 )
