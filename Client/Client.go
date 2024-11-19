@@ -2,23 +2,24 @@
 package main
 
 import (
-	proto "DSMandatoryActivity3TIM/gRPC"
-	"bufio"
-	"context"
-	"fmt"
+	//proto "Handin5AuctionSystem/gRPC"
 	"log"
 	"os"
-	"strings"
-	"sync"
-	"unicode/utf8"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	//"google.golang.org/grpc"
+	//"google.golang.org/grpc/credentials/insecure"
 )
 
 var timestamp int32
 
 func main() {
+	//if invalid cli error is displayed
+	if len(os.Args) < 2 || len(os.Args) > 2 {
+		log.Fatal("error making client, run: go run client.go <client.ID> ")
+	}
+	clientID := os.Args[1]
+	log.Printf(clientID)
+ 
 	client := proto.AuctionClient(nil)
 	ports := [3]string{"localhost:5101", "localhost:5102", "localhost:5103"}
 
@@ -26,8 +27,5 @@ func main() {
 		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		client = proto.NewAuctionClient(conn)
 	}
-	
-	
-	
 }
 

@@ -1,4 +1,4 @@
-module DSMandatoryActivity3TIM
+module Handin5AuctionSystem
 
 go 1.23.1
 

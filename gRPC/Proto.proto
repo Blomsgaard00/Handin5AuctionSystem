@@ -13,7 +13,6 @@ message Ack {
 
 message Result {
     string result = 1;
-    int32 clientid = 2; 
 }
 
 message Empty{}
