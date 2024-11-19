@@ -3,8 +3,6 @@ package Auction;
 
 option go_package = "Handin5AuctionSystem/gRPC";
 
-//Heavily inspired by https://medium.com/@bhadange.atharv/building-a-real-time-chat-application-with-grpc-and-go-aa226937ad3c
-
 message Bid {
     int32 amount = 1;
     int32 clientid = 2; 

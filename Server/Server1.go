@@ -15,28 +15,24 @@ type AuctionServer1 struct {
 	proto.UnimplementedAuctionServer
 	//stream?
 	//active bool
-	currentWinner string
-	highestBid    int32
-	clientWithHighest int32
-	clients map[string]bool
-	error chan error
+	highestBid proto.Bid
 }
 
 // bididng
-func (s *AuctionServer1) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack) {
+func (s *AuctionServer1) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack, error) {
 	if (s.highestBid < msg.Bid){
 		s.highestBid = msg.Bid
 		s.highestBid = msg.Clientid
-		return "bid valid"
+		return "bid valid", nil
 	} else{
-		return "bid invalid"
+		return "bid invalid", nil
 	}
 }
 
 // ctx context.Context, msg *proto.Message) (*proto.Close, error
 // result
-func (s *AuctionServer1) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result) {
-	return s.highestBid //, s.currentWinner
+func (s *AuctionServer1) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result, error) {
+	return s.highestBid, nil//, s.currentWinner
 }
 
 func main() {
