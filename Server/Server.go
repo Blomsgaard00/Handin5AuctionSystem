@@ -22,19 +22,19 @@ type AuctionServer struct {
 }
 
 // bididng
-func (s *AuctionServer) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack) {
+func (s *AuctionServer) Bidding(ctx context.Context, msg *proto.Bid) (*proto.Ack, error) {
 	if (s.highestBid < msg.Bid){
 		s.highestBid = msg.Bid
-		return "bid valid"
+		return "bid valid", nil
 	} else{
-		return "bid invalid"
+		return "bid invalid", nil
 	}
 }
 
 // ctx context.Context, msg *proto.Message) (*proto.Close, error
 // result
-func (s *AuctionServer) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result) {
-	return s.highestBid //, s.currentWinner
+func (s *AuctionServer) GetResult(ctx context.Context, msg *proto.Empty) (*proto.Result, error) {
+	return s.highestBid,nil //, s.currentWinner
 }
 
 func main() {
