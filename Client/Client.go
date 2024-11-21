@@ -7,9 +7,10 @@ import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
-	"strconv"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -24,10 +25,13 @@ func main() {
 		log.Fatal("error making client, run: go run client.go <client.ID> ")
 	}
 	clientID = os.Args[1]
-	log.Printf(clientID)
- 
+
 	client := proto.AuctionClient(nil)
 	ports = [3]string{"localhost:5101", "localhost:5102", "localhost:5103"}
+	log.Println(clientID + " has now joined the auction and you have 2 options:")
+	log.Println("write 'bid' to enter a bid in the auction")
+	log.Println("write 'get result' to get the auction result")
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -39,9 +43,12 @@ func main() {
 			text = strings.Replace(text, "\n", "", -1)
 			if strings.Compare("bid", text) == 0 {
 				readbid(client)
-			}
-			if strings.Compare("get result", text) == 0 || strings.Compare("getresult", text) == 0 {
-				getresult()
+			} else if strings.Compare("get result", text) == 0 || strings.Compare("getresult", text) == 0 {
+				//getresult()
+			} else {
+				log.Println("invalid command. You have two options: ")
+				log.Println("'bid' to enter a bid in the auction")
+				log.Println("'get result' to get the auction result")
 			}
 		}
 	}()
@@ -49,8 +56,8 @@ func main() {
 	wg.Wait()
 }
 
-func agreement(responce [3]int32){
-	
+func agreement(responce [3]int32) {
+
 }
 func readbid(client proto.AuctionClient) {
 	reader := bufio.NewReader(os.Stdin)
@@ -60,22 +67,28 @@ func readbid(client proto.AuctionClient) {
 	out = strings.Replace(out, "\n", "", -1)
 	amount, _ := strconv.Atoi(out)
 
-	for _, port := range ports{
+	for _, port := range ports {
 		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Fatalf("Error creating the server %v", err)
 		}
 		currentbid := &proto.Bid{
-			Amount: int32(amount),
+			Amount:   int32(amount),
 			Clientid: clientID,
 		}
-		client.Bidding(context.Background(), currentbid)
+
+		client = proto.NewAuctionClient(conn)
+		respons, err := client.Bidding(context.Background(), currentbid)
+		if err != nil {
+			log.Fatalf("Error creating the server %v", err)
+		}
+		log.Print(respons.BidAccepted)
 	}
 
 }
+
 /*//set client name by reading cli command
-	
+
 
 }
 */
-

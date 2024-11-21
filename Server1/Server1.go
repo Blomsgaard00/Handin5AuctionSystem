@@ -19,7 +19,7 @@ type AuctionServer struct {
 // bididng
 func (s *AuctionServer) Bidding(ctx context.Context, currentBid *proto.Bid) (*proto.Ack, error) {
 	
-	if (s.highestBid.Amount < currentBid.Amount){
+	if (s.highestBid.Amount < currentBid.Amount && s.auctionOpen){
 		s.highestBid.Amount = currentBid.Amount
 		s.highestBid.Clientid = currentBid.Clientid
 		acknowledgement := &proto.Ack{
@@ -56,10 +56,13 @@ func main() {
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer()
 
-	//create instance
-
+	server := &AuctionServer{
+		auctionOpen: true,
+	}
+	
 	// Register the pool with the gRPC server
-	proto.RegisterAuctionServer(grpcServer, &AuctionServer{})
+	proto.RegisterAuctionServer(grpcServer, server)
+	
 
 	// Create a TCP listener at port 5101
 	listener, err := net.Listen("tcp", ":5101")
