@@ -2,90 +2,93 @@
 package main
 
 import (
-	proto "DSMandatoryActivity3TIM/gRPC"
+	proto "Handin5AuctionSystem/gRPC"
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
-	"unicode/utf8"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var timestamp int32
+var ports [3]string
+var clientID string
 
 func main() {
-	conn, err := grpc.NewClient("localhost:5100", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Client not working")
+	//if invalid cli error is displayed
+	if len(os.Args) < 2 || len(os.Args) > 2 {
+		log.Fatal("error making client, run: go run client.go <client.ID> ")
 	}
-	client := proto.NewChittyChatClient(conn)
+	clientID = os.Args[1]
+
+	client := proto.AuctionClient(nil)
+	ports = [3]string{"localhost:5101", "localhost:5102", "localhost:5103"}
+	log.Println(clientID + " has now joined the auction and you have 2 options:")
+	log.Println("write 'bid' to enter a bid in the auction")
+	log.Println("write 'get result' to get the auction result")
+
 	var wg sync.WaitGroup
-
-	
-	timestamp = 0
-	connectionMessage := &proto.Connect{
-		Active:    true,
-		Timestamp: timestamp,
-	}
-
-	stream, err := client.CreateStream(context.Background(), connectionMessage)
-	if err != nil {
-		log.Fatalf("Not working")
-	}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		receiveMessage(stream)
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		SendMessage(client)
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			text, _ := reader.ReadString('\n')
+			// convert CRLF to LF
+			text = strings.Replace(text, "\n", "", -1)
+			if strings.Compare("bid", text) == 0 {
+				readbid(client)
+			} else if strings.Compare("get result", text) == 0 || strings.Compare("getresult", text) == 0 {
+				//getresult()
+			} else {
+				log.Println("invalid command. You have two options: ")
+				log.Println("'bid' to enter a bid in the auction")
+				log.Println("'get result' to get the auction result")
+			}
+		}
 	}()
 
 	wg.Wait()
 }
 
-func receiveMessage(stream grpc.ServerStreamingClient[proto.Message]) {
-	for {
-		input, err := stream.Recv()
-		if err != nil {
-			log.Fatalf("Not working")
+func agreement(responce [3]int32) {
 
-		}
-		if input.Timestamp > timestamp {
-			timestamp = input.Timestamp
-		}
-		log.Println("Lamport timestamp: " + fmt.Sprint(timestamp) + ", Message: " + input.Message)
-
-	}
 }
-
-func SendMessage(client proto.ChittyChatClient) {
+func readbid(client proto.AuctionClient) {
 	reader := bufio.NewReader(os.Stdin)
-	for {
-		//code for reading terminal input based on https://tutorialedge.net/golang/reading-console-input-golang/
-		text, _ := reader.ReadString('\n')
-		// convert CRLF to LF
-		text = strings.Replace(text, "\n", "", -1)
+	//var amount int32
+	log.Print("Enter bid amount: ")
+	out, _ := reader.ReadString('\n')
+	out = strings.Replace(out, "\n", "", -1)
+	amount, _ := strconv.Atoi(out)
 
-		//checks if message is shorter that 128 charactors and a valid UTF-8 string.
-		//The UTF-8 check is from a method https://henvic.dev/posts/go-utf8/
-		if len(text) < 128 && utf8.ValidString(text) {
-			sendMessage := &proto.Message{
-				Message:   text,
-				Timestamp: timestamp,
-			}
-			client.BroadcastMessage(context.Background(), sendMessage)
-		} else {
-			log.Println("invalid message")
+	for _, port := range ports {
+		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatalf("Error creating the server %v", err)
+		}
+		currentbid := &proto.Bid{
+			Amount:   int32(amount),
+			Clientid: clientID,
 		}
 
+		client = proto.NewAuctionClient(conn)
+		respons, err := client.Bidding(context.Background(), currentbid)
+		if err != nil {
+			log.Fatalf("Error creating the server %v", err)
+		}
+		log.Print(respons.BidAccepted)
 	}
 
 }
+
+/*//set client name by reading cli command
+
+
+}
+*/
