@@ -27,10 +27,15 @@ func main() {
 	clientID = os.Args[1]
 
 	client := proto.AuctionClient(nil)
+
+	timestamp = 0
+
 	ports = [3]string{"localhost:5101", "localhost:5102", "localhost:5103"}
 	log.Println(clientID + " has now joined the auction and you have 2 options:")
 	log.Println("write 'bid' to enter a bid in the auction")
 	log.Println("write 'get result' to get the auction result")
+
+	timestamp++
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -60,6 +65,7 @@ func agreement(responce [3]int32) {
 
 }
 func readbid(client proto.AuctionClient) {
+	timestamp++
 	reader := bufio.NewReader(os.Stdin)
 	//var amount int32
 	log.Print("Enter bid amount: ")
@@ -73,8 +79,9 @@ func readbid(client proto.AuctionClient) {
 			log.Fatalf("Error creating the server %v", err)
 		}
 		currentbid := &proto.Bid{
-			Amount:   int32(amount),
-			Clientid: clientID,
+			Amount:    int32(amount),
+			Clientid:  clientID,
+			Timestamp: timestamp,
 		}
 
 		client = proto.NewAuctionClient(conn)
@@ -87,8 +94,13 @@ func readbid(client proto.AuctionClient) {
 
 }
 
-/*//set client name by reading cli command
+func compareTimestamps(timestampServer int32, timeStampClient int32) int32 {
+	highestTimestamp := timestampServer
 
+	if timeStampClient > highestTimestamp {
+		highestTimestamp = timeStampClient
+	}
+
+	return highestTimestamp
 
 }
-*/
