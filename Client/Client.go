@@ -56,9 +56,6 @@ func main() {
 	wg.Wait()
 }
 
-func agreement(responce [3]int32) {
-
-}
 func readbid(client proto.AuctionClient) {
 	reader := bufio.NewReader(os.Stdin)
 	//var amount int32
@@ -66,6 +63,7 @@ func readbid(client proto.AuctionClient) {
 	out, _ := reader.ReadString('\n')
 	out = strings.Replace(out, "\n", "", -1)
 	amount, _ := strconv.Atoi(out)
+	responses := [3]*proto.Ack{}
 
 	for _, port := range ports {
 		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -82,7 +80,7 @@ func readbid(client proto.AuctionClient) {
 		if err != nil {
 			log.Fatalf("Error creating the server %v", err)
 		}
-		log.Print(respons.BidAccepted)
+		responses[1] = respons
 	}
 
 }
