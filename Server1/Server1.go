@@ -6,23 +6,22 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
 
 	"google.golang.org/grpc"
 )
 
 type AuctionServer struct {
 	proto.UnimplementedAuctionServer
-	auctionOpen bool
 	highestBid  proto.Bid
 	timestamp   int32
 }
 
-// bididng
+// bidding
 func (s *AuctionServer) Bidding(ctx context.Context, currentBid *proto.Bid) (*proto.Ack, error) {
 	s.timestamp = compareTimestamps(s.timestamp, currentBid.Timestamp)
 	s.timestamp++
-	if s.highestBid.Amount < currentBid.Amount && s.auctionOpen {
+	log.Println(s.timestamp)
+	if s.highestBid.Amount < currentBid.Amount && s.timestamp < 10 {
 		s.highestBid.Amount = currentBid.Amount
 		s.highestBid.Clientid = currentBid.Clientid
 		acknowledgement := &proto.Ack{
@@ -44,7 +43,8 @@ func (s *AuctionServer) Bidding(ctx context.Context, currentBid *proto.Bid) (*pr
 // result
 func (s *AuctionServer) GetResult(ctx context.Context, empty *proto.Empty) (*proto.Result, error) {
 	s.timestamp++
-	if s.auctionOpen {
+	log.Println(s.timestamp)
+	if s.timestamp < 10 {
 		result := &proto.Result{
 			Result:    "Current highest bid is " + fmt.Sprint(s.highestBid.Amount) + " by client: " + s.highestBid.Clientid,
 			Timestamp: s.timestamp,
@@ -65,7 +65,6 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	server := &AuctionServer{
-		auctionOpen: true,
 		timestamp:   0,
 	}
 
@@ -79,20 +78,11 @@ func main() {
 	}
 
 	log.Println("Server started at port :5101")
-
+	
+	server.timestamp++
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Error creating the server %v", err)
 	}
-	server.timestamp++
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		auctionTime(server)
-	}()
-	wg.Wait()
-
 }
 
 func compareTimestamps(timestampServer int32, timeStampClient int32) int32 {
@@ -103,16 +93,5 @@ func compareTimestamps(timestampServer int32, timeStampClient int32) int32 {
 	}
 
 	return highestTimestamp
-
-}
-
-func auctionTime(s *AuctionServer) {
-
-	for {
-		if s.timestamp > 20 {
-			s.auctionOpen = false
-			break
-		}
-	}
 
 }
