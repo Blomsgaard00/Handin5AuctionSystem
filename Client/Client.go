@@ -68,7 +68,7 @@ func getresult(client proto.AuctionClient) {
 	for index, port := range ports {
 		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			log.Println("A server has crashed")
+			log.Println("The server at port " + port + " has crashed")
 			continue
 		}
 		empty := &proto.Empty{}
@@ -76,7 +76,7 @@ func getresult(client proto.AuctionClient) {
 		client = proto.NewAuctionClient(conn)
 		respons, err := client.GetResult(context.Background(), empty)
 		if err != nil {
-			log.Println("A server has crashed")
+			log.Println("The server at port " + port + " has crashed")
 			continue
 		}
 		if timestamp > respons.Timestamp {
@@ -108,7 +108,7 @@ func readbid(client proto.AuctionClient) {
 	for index, port := range ports {
 		conn, err := grpc.NewClient(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			log.Println("A server has crashed")
+			log.Println("The server at port " + port + " has crashed")
 			continue
 		}
 		currentbid := &proto.Bid{
@@ -120,7 +120,7 @@ func readbid(client proto.AuctionClient) {
 		client = proto.NewAuctionClient(conn)
 		respons, err := client.Bidding(context.Background(), currentbid)
 		if err != nil {
-			log.Println("A server has crashed")
+			log.Println("The server at port " + port + " has crashed")
 			continue
 		}
 		responses[index] = respons
